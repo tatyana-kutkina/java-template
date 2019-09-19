@@ -6,7 +6,7 @@ package edu.spbu.matrix;
 public interface Matrix
 {
   /**
-   * однопоточное умнджение матриц
+   * однопоточное умножение матриц
    * должно поддерживаться для всех 4-х вариантов
    * @param o
    * @return
