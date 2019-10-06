@@ -1,6 +1,7 @@
 package edu.spbu.matrix;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -19,30 +20,42 @@ public class DenseMatrix implements Matrix
    * @param fileName
    */
   public DenseMatrix(String fileName) {
-    try {
-        
-      Reader reader = new FileReader(fileName);
-      BufferedReader bufReader = new BufferedReader(reader);
+    try(BufferedReader bufReader = new BufferedReader(new FileReader(fileName))) {
 
       String line;
+      ArrayList<Double[]> list = new ArrayList<>();
+      Double[] row;
       int count=0;
 
-      while((line=bufReader.readLine())!=null){
-        count++;
+      if((line=bufReader.readLine())!=null){
         String[] st = line.split(" ");
-        this.columns= st.length;
-        if(count==1){
-          deMatrix = new double[ARRAY_SIZE][st.length];
-        }
-
-        for(int i=0;i<st.length;i++){
-          if (deMatrix == null) throw new AssertionError();
-          deMatrix[count-1][i] = Double.parseDouble(st[i]);
-        }
+        count = st.length;
+        row = new Double[count];
+        for(int i=0;i<st.length;i++)
+          row[i]=Double.parseDouble(st[i]);
+        list.add(row);
       }
-      this.rows=count;
 
-      bufReader.close();
+      while((line=bufReader.readLine())!=null){
+        String[] st = line.split(" ");
+
+        if(st.length!=count){
+          throw new RuntimeException("Некорректно задана матрица: строки разных размеров");
+        }
+
+        row = new Double[st.length];
+        for(int i=0;i<st.length;i++)
+          row[i]=Double.parseDouble(st[i]);
+        list.add(row);
+
+      }
+      deMatrix=new double[list.size()][count];
+      columns=count;
+      rows=list.size();
+
+      for(int i=0;i<rows;i++)
+        for(int j=0;j<columns;j++)
+          deMatrix[i][j]=list.get(i)[j];
     }
 
     catch(IOException e) {
@@ -67,7 +80,6 @@ public class DenseMatrix implements Matrix
   @Override public Matrix mul(Matrix o)
   {
     if(o instanceof DenseMatrix){
-      //DenseMatrix o1 = (DenseMatrix) o;
       if(this.columns!=((DenseMatrix)o).rows){
         throw new RuntimeException("Введена неправильных размеров матрица");
       }
