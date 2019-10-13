@@ -122,12 +122,12 @@ public class DenseMatrix implements Matrix
 
     if(this==o)
       return true;
-    /*
+/*
     if(this.hashCode()!=(o.hashCode())){
       System.out.printf("%d %d ", this.hashCode(), o.hashCode());
       return false;
-    }
-    */
+    }*/
+
     if(o instanceof DenseMatrix) {
       DenseMatrix dM = (DenseMatrix) o;
 

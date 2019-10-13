@@ -41,4 +41,13 @@ public class MatrixTest
     assertEquals(expected, m1.mul(m2));
   }
 
+  @Test
+  public void mulDD5() {
+    Matrix m1 = new DenseMatrix("m11.txt");
+    Matrix m2 = new DenseMatrix("m22.txt");
+    Matrix expected = new DenseMatrix("result2.txt");
+    assertEquals(expected, m1.mul(m2));
+    //System.out.println(m1.mul(m2));
+  }
+
 }
