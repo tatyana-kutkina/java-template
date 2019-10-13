@@ -3,6 +3,7 @@ package edu.spbu.matrix;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Плотная матрица
@@ -108,8 +109,12 @@ public class DenseMatrix implements Matrix
     return null;
   }
 
-  public int hashCode(){
-     return Arrays.hashCode(deMatrix);
+  @Override
+  public int hashCode() {
+
+    int result = Objects.hash(rows, columns);
+    result = 31 * result + Arrays.deepHashCode(deMatrix);
+    return result;
   }
 
   /**
@@ -118,15 +123,19 @@ public class DenseMatrix implements Matrix
    * @return
    */
 
+
   @Override public boolean equals(Object o) {
 
     if(this==o)
       return true;
-/*
+    /*
+    System.out.printf("%d %d ", this.hashCode(), o.hashCode());
+    System.out.println("\n");
+    */
+    //проверка на хэшкод
     if(this.hashCode()!=(o.hashCode())){
-      System.out.printf("%d %d ", this.hashCode(), o.hashCode());
       return false;
-    }*/
+    }
 
     if(o instanceof DenseMatrix) {
       DenseMatrix dM = (DenseMatrix) o;
@@ -166,11 +175,5 @@ public class DenseMatrix implements Matrix
       res.deMatrix[j][i]=deMatrix[i][j];
       return res;
   }
-
-  /*public static void main (String[] args){
-    Matrix m1 = new DenseMatrix("m1.txt");
-    Matrix m2 = new DenseMatrix("wrongSize.txt");
-    System.out.println(m1.mul(m2));
-  }*/
 
 }

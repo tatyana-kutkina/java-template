@@ -3,6 +3,7 @@ package edu.spbu.matrix;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 public class MatrixTest
 {
@@ -22,7 +23,7 @@ public class MatrixTest
     Matrix m1 = new DenseMatrix("m1.txt");
     Matrix m2 = new DenseMatrix("m2.txt");
     Matrix expected = new DenseMatrix("wrongResultSize.txt");
-    assertEquals(expected, m1.mul(m2));
+    assertNotEquals(expected, m1.mul(m2));
   }
 
   @Test
@@ -30,10 +31,10 @@ public class MatrixTest
     Matrix m1 = new DenseMatrix("m1.txt");
     Matrix m2 = new DenseMatrix("m2.txt");
     Matrix expected = new DenseMatrix("wrongResultVal.txt");
-    assertEquals(expected, m1.mul(m2));
+    assertNotEquals(expected, m1.mul(m2));
   }
 
-  @Test
+  @Test(expected=RuntimeException.class)
   public void mulDD4() {
     Matrix m1 = new DenseMatrix("m1.txt");
     Matrix m2 = new DenseMatrix("wrongSize.txt");
