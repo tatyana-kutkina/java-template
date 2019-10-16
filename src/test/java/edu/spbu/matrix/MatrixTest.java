@@ -10,6 +10,8 @@ public class MatrixTest
   /**
    * ожидается 4 таких теста
    */
+
+  //все ок
   @Test
   public void mulDD1() {
     Matrix m1 = new DenseMatrix("m1.txt");
@@ -18,6 +20,7 @@ public class MatrixTest
     assertEquals(expected, m1.mul(m2));
   }
 
+  //у результата не такой же размер
   @Test
   public void mulDD2() {
     Matrix m1 = new DenseMatrix("m1.txt");
@@ -26,6 +29,7 @@ public class MatrixTest
     assertNotEquals(expected, m1.mul(m2));
   }
 
+  //у результата другое значение
   @Test
   public void mulDD3() {
     Matrix m1 = new DenseMatrix("m1.txt");
@@ -33,7 +37,7 @@ public class MatrixTest
     Matrix expected = new DenseMatrix("wrongResultVal.txt");
     assertNotEquals(expected, m1.mul(m2));
   }
-
+  //одна из матриц неподходящего размера
   @Test(expected=RuntimeException.class)
   public void mulDD4() {
     Matrix m1 = new DenseMatrix("m1.txt");

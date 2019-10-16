@@ -1,5 +1,6 @@
 package edu.spbu.matrix;
 
+import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,11 +11,16 @@ import java.util.Objects;
  */
 public class DenseMatrix implements Matrix
 {
-
-  public static final int ARRAY_SIZE = 2000;
   double[][] deMatrix;
   int rows;
   int columns;
+
+  //конструктор dense матрицы
+  public DenseMatrix(int rows, int columns){
+    this.rows = rows;
+    this.columns = columns;
+    deMatrix = new double [rows] [columns];
+  }
 
   /**
    * загружает матрицу из файла
@@ -65,14 +71,9 @@ public class DenseMatrix implements Matrix
 
   }
 
-    public DenseMatrix(int rows, int columns){
-        this.rows = rows;
-        this.columns = columns;
-        deMatrix = new double [rows] [columns];
-    }
 
   /**
-   * однопоточное умнджение матриц
+   * однопоточное умножение матриц
    * должно поддерживаться для всех 4-х вариантов
    *
    * @param o
@@ -81,9 +82,11 @@ public class DenseMatrix implements Matrix
   @Override public Matrix mul(Matrix o)
   {
     if(o instanceof DenseMatrix){
+
       if(this.columns!=((DenseMatrix)o).rows){
         throw new RuntimeException("Введена неправильных размеров матрица");
       }
+
       DenseMatrix result = new DenseMatrix(this.rows, ((DenseMatrix)o).columns);
       DenseMatrix o1 = ((DenseMatrix)o).transp();
       for(int i=0;i<this.rows;i++) {
@@ -95,6 +98,33 @@ public class DenseMatrix implements Matrix
       }
       return (result);
     }
+
+    if(o instanceof SparseMatrix){
+
+      if(this.columns!=((SparseMatrix)o).rows){
+        throw new RuntimeException("Введена неправильных размеров матрица");
+      }
+      SparseMatrix result = new SparseMatrix(this.rows, ((SparseMatrix)o).columns);
+      SparseMatrix o1 = ((SparseMatrix)o).transp();
+
+      for( Point key: o1.val.keySet()) {
+        for (int i = 0; i < this.rows; i++) {
+          if(deMatrix[i][key.y]!=0){
+            Point p = new Point(i,key.x);
+            if (result.val.containsKey(p)){
+              double t = result.val.get(p) + deMatrix[i][key.y]*o1.val.get(key);
+              result.val.put(p,t);
+            }
+            else {
+              double t = deMatrix[i][key.y] * o1.val.get(key);
+              result.val.put(p, t);
+            }
+          }
+        }
+      }
+      return (result);
+    }
+
     return null;
   }
 
@@ -128,16 +158,14 @@ public class DenseMatrix implements Matrix
 
     if(this==o)
       return true;
-    /*
-    System.out.printf("%d %d ", this.hashCode(), o.hashCode());
-    System.out.println("\n");
-    */
-    //проверка на хэшкод
-    if(this.hashCode()!=(o.hashCode())){
-      return false;
-    }
 
     if(o instanceof DenseMatrix) {
+
+      //проверка на хэшкод
+      if(this.hashCode()!=(o.hashCode())){
+        return false;
+      }
+
       DenseMatrix dM = (DenseMatrix) o;
 
       if (rows != dM.rows || columns != dM.columns)
@@ -151,7 +179,22 @@ public class DenseMatrix implements Matrix
         return true; // не найдено неравных элементов
       }
     }
-      else return false;
+
+    if(o instanceof SparseMatrix){
+      SparseMatrix sM = (SparseMatrix) o;
+      if(rows != sM.rows || columns != sM.columns)
+        return false;
+
+      for(Point key: sM.val.keySet()){
+        if(deMatrix[key.x][key.y]==0)
+          return false;
+        if(deMatrix[key.x][key.y]!=sM.val.get(key))
+          return false;
+      }
+      return true;
+    }
+
+    return false;
   }
 
   @Override
@@ -168,12 +211,20 @@ public class DenseMatrix implements Matrix
   }
 
   //транспонирование матрицы
-  private DenseMatrix transp(){
+  @Override
+  public DenseMatrix transp(){
     DenseMatrix res = new DenseMatrix(columns,rows);
     for(int i=0;i<rows;i++)
       for(int j=0;j<columns;j++)
       res.deMatrix[j][i]=deMatrix[i][j];
       return res;
   }
+/*
+  public static void main(String[] args){
+    DenseMatrix m1 = new DenseMatrix("sm1.txt");
+    SparseMatrix m2 = new SparseMatrix("sm2.txt");
+    Matrix m3 = (m1.mul(m2));
+    System.out.println(m3);
+  }*/
 
 }
