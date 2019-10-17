@@ -10,7 +10,7 @@ public class DenseMatrixTest
   /**
    * ожидается 4 таких теста
    */
-/*
+
   //все ок
   @Test
   public void mulDD1() {
@@ -45,16 +45,6 @@ public class DenseMatrixTest
     Matrix expected = new DenseMatrix("result.txt");
     assertEquals(expected, m1.mul(m2));
   }
-*/
-  @Test
-  public void mulDD5() {
-    Matrix m1 = new DenseMatrix("M11.txt");
-    Matrix m2 = new DenseMatrix("M22.txt");
-    Matrix m3 = new SparseMatrix("M11.txt");
-    Matrix m4 = new SparseMatrix("M22.txt");
-    Matrix m5 = m1.mul(m2);
-    Matrix m6 = m3.mul(m4);
-    assertEquals(m5,m6);
-  }
+
 
 }
