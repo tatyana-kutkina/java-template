@@ -19,9 +19,9 @@ public class SparseMatrixTest {
     //большая матрица
     @Test
     public void mulSS2() {
-        Matrix m1 = new SparseMatrix("M1.txt");
-        Matrix m2 = new SparseMatrix("M2.txt");
-        Matrix expected = new SparseMatrix("RESULT.txt");
+        Matrix m1 = new SparseMatrix("M11.txt");
+        Matrix m2 = new SparseMatrix("M22.txt");
+        Matrix expected = new SparseMatrix("RESULT1.txt");
         assertEquals(expected, m1.mul(m2));
     }
 
@@ -30,7 +30,7 @@ public class SparseMatrixTest {
     public void mulSD1() {
         Matrix m1 = new SparseMatrix("sm1.txt");
         Matrix m2 = new DenseMatrix("sm2.txt");
-        Matrix expected = new SparseMatrix("sresult.txt");
+        Matrix expected = new DenseMatrix("sresult.txt");
         assertEquals(expected, m1.mul(m2));
     }
 
@@ -42,4 +42,23 @@ public class SparseMatrixTest {
         Matrix expected = new SparseMatrix("sresult.txt");
         assertEquals(expected, m1.mul(m2));
     }
+
+    //в ожидаемом есть ключ, кт нет в реал. результате
+    @Test
+    public void mulSS4() {
+        Matrix m1 = new SparseMatrix("sm1.txt");
+        Matrix m2 = new SparseMatrix("sm2.txt");
+        Matrix expected = new SparseMatrix("wrongKeySet1.txt");
+        assertNotEquals(expected, m1.mul(m2));
+    }
+
+    //в реал. результате есть ключ, кт нет в ожидаемом результате
+    @Test
+    public void mulSS3() {
+        Matrix m1 = new SparseMatrix("sm1.txt");
+        Matrix m2 = new SparseMatrix("wrongKeySet2.txt");
+        Matrix expected = new SparseMatrix("sresult.txt");
+        assertNotEquals(expected, m1.mul(m2));
+    }
+
 }

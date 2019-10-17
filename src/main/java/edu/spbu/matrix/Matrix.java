@@ -21,4 +21,7 @@ public interface Matrix
   Matrix dmul(Matrix o);
 
   Matrix transp();
+
+
+
 }

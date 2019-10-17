@@ -185,14 +185,22 @@ public class DenseMatrix implements Matrix
       if(rows != sM.rows || columns != sM.columns)
         return false;
 
-      for(Point key: sM.val.keySet()){
-        if(deMatrix[key.x][key.y]==0)
-          return false;
-        if(deMatrix[key.x][key.y]!=sM.val.get(key))
-          return false;
+      int count=0;
+      for(int i=0;i<rows;i++)
+        for(int j=0;j<columns;j++)
+          if(deMatrix[i][j]!=0)
+            count++;
+      if(count==sM.val.size()){
+        for(Point key: sM.val.keySet()){
+          if(deMatrix[key.x][key.y]==0)
+            return false;
+          if(deMatrix[key.x][key.y]!=sM.val.get(key))
+            return false;
+        }
+        return true;
       }
-      return true;
-    }
+      return false;
+      }
 
     return false;
   }

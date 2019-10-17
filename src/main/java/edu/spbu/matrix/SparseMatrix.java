@@ -176,14 +176,17 @@ public class SparseMatrix implements Matrix {
 
       if (rows != sM.rows || columns != sM.columns)
         return false;
-      for(Point key: val.keySet()){
-        if(!sM.val.containsKey(key))
-          return false;
-        if (Math.abs(val.get(key) - sM.val.get(key)) != 0){
-          return false;
+      if(val.size()==sM.val.size()){
+        for(Point key: val.keySet()){
+          if(!sM.val.containsKey(key))
+            return false;
+          if (Math.abs(val.get(key) - sM.val.get(key)) != 0){
+            return false;
+          }
         }
-      }
         return true;
+      }
+      return false;
     }
 
     if(o instanceof DenseMatrix){
@@ -192,13 +195,21 @@ public class SparseMatrix implements Matrix {
       if (rows != dM.rows || columns != dM.columns)
         return false;
 
-      for(Point key: val.keySet()){
-        if(dM.deMatrix[key.x][key.y]==0)
-          return false;
-        if(dM.deMatrix[key.x][key.y]!=val.get(key))
-          return false;
+      int count=0;
+      for(int i=0;i<dM.rows;i++)
+        for(int j=0;j<dM.columns;j++)
+          if(dM.deMatrix[i][j]!=0)
+            count++;
+      if(count==val.size()){
+        for(Point key: val.keySet()){
+          if(dM.deMatrix[key.x][key.y]==0)
+            return false;
+          if(dM.deMatrix[key.x][key.y]!=val.get(key))
+            return false;
+        }
+        return true;
       }
-      return true;
+      return false;
     }
 
     return false;
