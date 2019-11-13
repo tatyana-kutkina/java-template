@@ -6,6 +6,39 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 
+class Muller implements Runnable{
+
+  int rows,columns;
+  int end, start;
+  DenseMatrix right, left,res;
+
+  Muller(int indexS, int indexEn,int columns, DenseMatrix right, DenseMatrix left, DenseMatrix res ){
+    this.end = indexEn;
+    this.start = indexS;
+    this.columns = columns;
+    this.right = right;
+    this.left = left;
+    this.res = res;
+    this.rows = indexEn-indexS;
+  }
+
+  @Override
+  public void run(){
+    for(int i=start;i<end;i++) {
+      for (int j = 0; j < res.columns; j++) {
+        for (int k = 0; k < this.columns; k++) {
+          res.deMatrix[i][j] += left.deMatrix[i][k] * right.deMatrix[j][k];
+        }/*
+        System.out.printf("%d %d ", i, j);
+        System.out.println(res.deMatrix[i][j]);
+        System.out.println("\n");*/
+      }
+    }
+  }
+
+}
+
+
 /**
  * Плотная матрица
  */
@@ -134,104 +167,132 @@ public class DenseMatrix implements Matrix
    * @param o
    * @return
    */
-  @Override public Matrix dmul(Matrix o)
-  {
-    return null;
-  }
+  @Override public Matrix dmul(Matrix o) {
 
-  @Override
-  public int hashCode() {
+    if(o instanceof DenseMatrix){
 
-    int result = Objects.hash(rows, columns);
-    result = 31 * result + Arrays.deepHashCode(deMatrix);
-    return result;
-  }
-
-  /**
-   * спавнивает с обоими вариантами
-   * @param o
-   * @return
-   */
-
-
-  @Override public boolean equals(Object o) {
-
-    if(this==o)
-      return true;
-
-    if(o instanceof DenseMatrix) {
-
-      //проверка на хэшкод
-      if(this.hashCode()!=(o.hashCode())){
-        return false;
+      if(this.columns!=((DenseMatrix)o).rows){
+        throw new RuntimeException("Введена неправильных размеров матрица");
       }
 
-      DenseMatrix dM = (DenseMatrix) o;
+      DenseMatrix result = new DenseMatrix(this.rows, ((DenseMatrix)o).columns);
+      DenseMatrix dM = ((DenseMatrix)o).transp();
 
-      if (rows != dM.rows || columns != dM.columns)
-        return false;
-      else {
-        for (int i = 0; i < rows; i++)
-          for (int j = 0; j < columns; j++) {
-            if (deMatrix[i][j] != dM.deMatrix[i][j])
-              return false;
-          }
-        return true; // не найдено неравных элементов
+
+      Thread[] threads = new Thread[4];
+      int ost = rows%4;
+      int j=0;
+      for(int i=0;i<4;i++){
+        j=rows/4;
+        Muller muller;
+        if(i==ost&&i!=0) {
+          muller = new Muller(i * j, j * (i + 1) + ost, columns, dM,this, result);
+        }
+        else {
+          muller = new Muller(i * j, j * (i + 1), columns, dM,this, result);
+        }
+        threads[i]= new Thread(muller);
+        threads[i].start();
       }
+      for(int i=0;i<4;i++){
+        try {
+          threads[i].join();
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+
+      return(result);
     }
 
-    if(o instanceof SparseMatrix){
-      SparseMatrix sM = (SparseMatrix) o;
-      if(rows != sM.rows || columns != sM.columns)
-        return false;
+     return null;
+  }
 
-      int count=0;
-      for(int i=0;i<rows;i++)
-        for(int j=0;j<columns;j++)
-          if(deMatrix[i][j]!=0)
-            count++;
-      if(count==sM.val.size()){
-        for(Point key: sM.val.keySet()){
-          if(deMatrix[key.x][key.y]==0)
+    @Override
+    public int hashCode () {
+
+      int result = Objects.hash(rows, columns);
+      result = 31 * result + Arrays.deepHashCode(deMatrix);
+      return result;
+    }
+
+    /**
+     * спавнивает с обоими вариантами
+     * @param o
+     * @return
+     */
+
+
+    @Override public boolean equals (Object o){
+
+      if (this == o)
+        return true;
+
+      if (o instanceof DenseMatrix) {
+
+        //проверка на хэшкод
+        if (this.hashCode() != (o.hashCode())) {
+          return false;
+        }
+
+        DenseMatrix dM = (DenseMatrix) o;
+
+        if (rows != dM.rows || columns != dM.columns)
+          return false;
+        else {
+          for (int i = 0; i < rows; i++)
+            for (int j = 0; j < columns; j++) {
+              if (deMatrix[i][j] != dM.deMatrix[i][j])
+                return false;
+            }
+          return true; // не найдено неравных элементов
+        }
+      }
+
+      if (o instanceof SparseMatrix) {
+        SparseMatrix sM = (SparseMatrix) o;
+        if (rows != sM.rows || columns != sM.columns)
+          return false;
+
+        for (Point key : sM.val.keySet()) {
+          if (deMatrix[key.x][key.y] == 0)
             return false;
-          if(deMatrix[key.x][key.y]!=sM.val.get(key))
+          if (deMatrix[key.x][key.y] != sM.val.get(key))
             return false;
         }
         return true;
       }
+
       return false;
-      }
-
-    return false;
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder str = new StringBuilder();
-    for(int i=0; i<rows;i++) {
-      for (int j = 0; j < columns; j++) {
-        str.append(deMatrix[i][j]);
-        str.append(" ");
-      }
-      str.append("\n");
     }
-    return (str.toString());
-  }
 
-  //транспонирование матрицы
-  @Override
-  public DenseMatrix transp(){
-    DenseMatrix res = new DenseMatrix(columns,rows);
-    for(int i=0;i<rows;i++)
-      for(int j=0;j<columns;j++)
-      res.deMatrix[j][i]=deMatrix[i][j];
+    @Override
+    public String toString () {
+      StringBuilder str = new StringBuilder();
+      for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < columns; j++) {
+          str.append(deMatrix[i][j]);
+          str.append(" ");
+        }
+        str.append("\n");
+      }
+      return (str.toString());
+    }
+
+    //транспонирование матрицы
+    @Override
+    public DenseMatrix transp () {
+      DenseMatrix res = new DenseMatrix(columns, rows);
+      for (int i = 0; i < rows; i++)
+        for (int j = 0; j < columns; j++)
+          res.deMatrix[j][i] = deMatrix[i][j];
       return res;
-  }
+    }
 /*
   public static void main(String[] args){
-    DenseMatrix m1 = new DenseMatrix("sm1.txt");
-    SparseMatrix m2 = new SparseMatrix("sm2.txt");
-    Matrix m3 = (m1.mul(m2));
+    DenseMatrix m1 = new DenseMatrix("BigDense1");
+    DenseMatrix m2 = new DenseMatrix("BigDense2");
+    Matrix m3 = (m1.dmul(m2));
     System.out.println(m3);
   }*/
 

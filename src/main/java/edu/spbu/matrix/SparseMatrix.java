@@ -2,6 +2,7 @@ package edu.spbu.matrix;
 
 import java.awt.*;
 import java.io.*;
+import java.nio.channels.ScatteringByteChannel;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -244,11 +245,19 @@ public class SparseMatrix implements Matrix {
     }
     return (str.toString());
   }
-/*
-  public static void main(String[] args){
-    Matrix m1 = new SparseMatrix("sm1.txt");
-    Matrix m2 = new DenseMatrix("sm2.txt");
-    System.out.println(m1.mul(m2));
+  /*
+  public static void main(String[] args) {
+    Matrix m1 = new SparseMatrix("M1.txt");
+    Matrix m2 = new DenseMatrix("M2.txt");
+    //System.out.println(m1.mul(m2));
+    try (FileWriter writer = new FileWriter("wrResult.txt")) {
+      Matrix m3 = m1.mul(m2);
+      m3.toString();
+      writer.write(m3.toString());
+
+    } catch (IOException e) {
+      System.out.println(e.getMessage());
+    }
   }*/
 
 }
