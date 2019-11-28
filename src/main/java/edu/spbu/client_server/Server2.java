@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 
 public class Server2 {
 
@@ -39,18 +41,26 @@ public class Server2 {
         File file = new File(filePath);
         if(file.exists()){
             try(FileReader fileRead = new FileReader(file)){
+
                 output.flush();
                 BufferedReader reader = new BufferedReader(fileRead);
-                String text="";
-                String i;
-                while ((i = reader.readLine()) != null) {
-                    text = text + i + "\r\n"; //посимвольно чтение файла
-                }
-                String response = "Отправляем текст из файла размером" + text.length() + "\r\n" +
-                        "Connection: close\r\n\r\n";
-                String result = response + text; //сервер выдает текст , который описан выше,  и текст из файла
-                output.write(result.getBytes());//отправляем ответ
+                StringBuilder text = new StringBuilder();
+                String i,content;
+                i=reader.readLine();
 
+                //чтение из файла
+                while(i!=null){
+                    text.append(i);
+                    i=reader.readLine();
+                }
+
+                content = text.toString();
+                String message="HTTP/1.1 200 OK\r\n" +
+                        "Server: Kakoi-to server\r\n" +
+                        "Content-Type: text/html\r\n" +
+                        "Connection: close\r\n\r\n" +content;
+                output.write(message.getBytes());//отправляем ответ
+                output.close();
             }
             catch(IOException e){
                 e.printStackTrace();
@@ -70,18 +80,21 @@ public class Server2 {
         BufferedReader reader = new BufferedReader(new InputStreamReader(input));
         System.out.println("Запрос принят");
         try{
-            System.out.println("line");
             String line;
             if((line=reader.readLine())!=null) {
-                System.out.println("line");
-                String[] st = line.split(" ");
+                System.out.println(line);
+                String[] st = line.split("/");
+                System.out.println(Arrays.toString(st));
                 if(st[1].length()>0){
                     filePath = st[1];
                     System.out.println("Запрос принят. Ищем файл: " + filePath);
+                    String str;
+                    /*while((str=reader.readLine()).length()!=0)
+                        System.out.println(str);*/
                     return filePath;
                 }
-
             }else System.out.println("ЧТо то сломалось");
+
         }catch(IOException e){
             e.printStackTrace();
         }

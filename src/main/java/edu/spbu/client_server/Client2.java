@@ -27,9 +27,12 @@ public class Client2 {
 
     //посылает запрос
     private static void sendData() throws IOException {
-        output.flush();
-        String s = "GET /home/tatyana/test.txt";
+        String servername;
+        //String s = "GET /test.html/ HTTP/1.1\r\nHost:" + servername +":5678\r\n\r\n";//пофиксить сервенэйм
+        String s="GET /test.html/ HTTP/1.1\r\nHost:";
         output.write(s.getBytes());
+
+        output.flush();
         System.out.println("Запрос отправлен");
 
     }

@@ -62,13 +62,13 @@ public class SparseMatrixTest {
     }
 
     // многопоточно 2 маленьких спарс
-   /* @Test
+   @Test
     public void dmulSS1() {
         Matrix m1 = new SparseMatrix("sm1.txt");
         Matrix m2 = new SparseMatrix("sm2.txt");
         Matrix expected = new SparseMatrix("sresult.txt");
         assertEquals(expected, m1.dmul(m2));
-    }*/
+    }
 
     //многопоточная большая матрица
     @Test

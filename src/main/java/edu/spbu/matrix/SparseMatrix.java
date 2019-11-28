@@ -10,6 +10,7 @@ import java.util.Objects;
 
 
 class SMuller implements Runnable{
+
   int start, step;
   SparseMatrix left, right, res;
   SMuller( int start, int step, SparseMatrix left, SparseMatrix right, SparseMatrix res){
@@ -27,13 +28,18 @@ class SMuller implements Runnable{
         Point p1 = new Point(i,key.y);
         if(right.val.containsKey(p1)){
           Point p2 = new Point(key.x, i);
+          res.update(p2,key,p1, res, left, right);
+
+          /*
           if (res.val.containsKey(p2)) {
-            double t = res.val.get(p2) + left.val.get(key) * right.val.get(p1);
+
+            double t = res.get2(p2) +  left.get2(key)* right.get2(p1);
             res.Put(p2, t);
           } else {
-            double t = left.val.get(key) * right.val.get(p1);
+            double t = left.get2(key) * right.get2(p1);
             res.Put(p2, t);
-          }
+          }*/
+
         }
       }
     }
@@ -56,6 +62,21 @@ public class SparseMatrix implements Matrix {
     this.rows = rows;
     this.columns = columns;
     val = new HashMap<>();
+  }
+
+  synchronized public void update(Point p2, Point key, Point p1,SparseMatrix res, SparseMatrix left, SparseMatrix right ) {
+    if(res.val.containsKey(p2)){
+      double t = res.get2(p2) + left.get2(key) * right.get2(p1);
+      res.Put(p2, t);
+    }
+   else{
+      double t = left.get2(key) * right.get2(p1);
+      res.Put(p2, t);
+    }
+  }
+
+  synchronized public Double get2(Point a){
+    return (this.val.get(a));
   }
 
   synchronized public void Put(Point a, Double b){
@@ -316,19 +337,5 @@ public class SparseMatrix implements Matrix {
     }
     return (str.toString());
   }
-  /*
-  public static void main(String[] args) {
-    Matrix m1 = new SparseMatrix("M1.txt");
-    Matrix m2 = new DenseMatrix("M2.txt");
-    //System.out.println(m1.mul(m2));
-    try (FileWriter writer = new FileWriter("wrResult.txt")) {
-      Matrix m3 = m1.mul(m2);
-      m3.toString();
-      writer.write(m3.toString());
-
-    } catch (IOException e) {
-      System.out.println(e.getMessage());
-    }
-  }*/
 
 }
