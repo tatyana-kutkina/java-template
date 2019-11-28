@@ -3,9 +3,45 @@ package edu.spbu.matrix;
 import java.awt.*;
 import java.io.*;
 import java.nio.channels.ScatteringByteChannel;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+
+
+class SMuller implements Runnable{
+  int start, step;
+  SparseMatrix left, right, res;
+  SMuller( int start, int step, SparseMatrix left, SparseMatrix right, SparseMatrix res){
+    this.start = start;
+    this.step = step;
+    this.left = left;
+    this.right = right;
+    this.res = res;
+  }
+
+  @Override
+  public void run() {
+    for(Point key: left.val.keySet()){
+      for(int i=start;i<start+step;i++){
+        Point p1 = new Point(i,key.y);
+        if(right.val.containsKey(p1)){
+          Point p2 = new Point(key.x, i);
+          if (res.val.containsKey(p2)) {
+            double t = res.val.get(p2) + left.val.get(key) * right.val.get(p1);
+            res.Put(p2, t);
+          } else {
+            double t = left.val.get(key) * right.val.get(p1);
+            res.Put(p2, t);
+          }
+        }
+      }
+    }
+  }
+
+}
+
+
 
 /**
  * Разреженная матрица
@@ -20,6 +56,10 @@ public class SparseMatrix implements Matrix {
     this.rows = rows;
     this.columns = columns;
     val = new HashMap<>();
+  }
+
+  synchronized public void Put(Point a, Double b){
+    this.val.put(a,b);
   }
 
 
@@ -145,6 +185,37 @@ public class SparseMatrix implements Matrix {
    */
   @Override
   public Matrix dmul(Matrix o) {
+
+    if(o instanceof SparseMatrix){
+
+      if (this.columns != ((SparseMatrix)o).rows) {
+        throw new RuntimeException("Введена неправильных размеров матрица");
+      }
+
+      SparseMatrix result = new SparseMatrix(this.rows, ((SparseMatrix)o).columns);
+      SparseMatrix sM = ((SparseMatrix) o).transp();
+      int step = sM.rows/4 + 1;
+      ArrayList<Thread> threads = new ArrayList<>();
+
+
+      for(int i=0;i< sM.rows;i+=step){
+        SMuller smuller = new SMuller( i,step,this, sM, result) ;
+        Thread t = new Thread(smuller);
+        threads.add(t);
+        t.start();
+      }
+      for(Thread th:threads){
+        try {
+          th.join();
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+
+
+      return (result);
+    }
+
     return null;
   }
 

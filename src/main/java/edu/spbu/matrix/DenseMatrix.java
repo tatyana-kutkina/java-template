@@ -6,13 +6,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 
-class Muller implements Runnable{
+class DMuller implements Runnable{
 
   int rows,columns;
   int end, start;
   DenseMatrix right, left,res;
 
-  Muller(int indexS, int indexEn,int columns, DenseMatrix right, DenseMatrix left, DenseMatrix res ){
+  DMuller(int indexS, int indexEn,int columns, DenseMatrix right, DenseMatrix left, DenseMatrix res ){
     this.end = indexEn;
     this.start = indexS;
     this.columns = columns;
@@ -28,10 +28,7 @@ class Muller implements Runnable{
       for (int j = 0; j < res.columns; j++) {
         for (int k = 0; k < this.columns; k++) {
           res.deMatrix[i][j] += left.deMatrix[i][k] * right.deMatrix[j][k];
-        }/*
-        System.out.printf("%d %d ", i, j);
-        System.out.println(res.deMatrix[i][j]);
-        System.out.println("\n");*/
+        }
       }
     }
   }
@@ -184,12 +181,12 @@ public class DenseMatrix implements Matrix
       int j=0;
       for(int i=0;i<4;i++){
         j=rows/4;
-        Muller muller;
+        DMuller muller;
         if(i==ost&&i!=0) {
-          muller = new Muller(i * j, j * (i + 1) + ost, columns, dM,this, result);
+          muller = new DMuller(i * j, j * (i + 1) + ost, columns, dM,this, result);
         }
         else {
-          muller = new Muller(i * j, j * (i + 1), columns, dM,this, result);
+          muller = new DMuller(i * j, j * (i + 1), columns, dM,this, result);
         }
         threads[i]= new Thread(muller);
         threads[i].start();
