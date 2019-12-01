@@ -2,40 +2,49 @@ package edu.spbu.client_server;
 import java.io.*;
 import java.net.*;
 
-public class Client2 {
+public class Client implements Runnable {
 
     static private Socket connection;
     static private DataOutputStream output;
     static private DataInputStream input;
 
-
     public static void main(String[] args) throws IOException {
         try{
-            connection = new Socket(InetAddress.getByName("ru.wikipedia.org"), 80);//имя хоста или ip адрес + порт
-            output = new DataOutputStream(connection.getOutputStream());
-            System.out.println("DataOutputStream  created");
-            input = new DataInputStream(connection.getInputStream());
-            System.out.println("DataInputStream created");
-            sendData("ru.wikipedia.org");
-            receiveData();
-
+            Client client = new Client("127.0.0.1", 5678);
+            client.sendData("Server");
+            client.receiveData();
         } catch(IOException e){
             e.printStackTrace();
         }
+    }
+
+    //конструктор клиента
+    public Client(String serverName, int port ) throws IOException {
+        connection = new Socket(InetAddress.getByName(serverName),port);
+
+        output = new DataOutputStream(connection.getOutputStream());
+        System.out.println("DataOutputStream  created");
+
+        input = new DataInputStream(connection.getInputStream());
+        System.out.println("DataInputStream created");
+    }
+
+    @Override
+    public void run(){
 
     }
 
     //посылает запрос
-    private static void sendData(String serverName) throws IOException {
+    private void sendData(String serverName) throws IOException {
         
-        String s = "GET / HTTP/1.1\r\nHost:" + serverName +"\r\n\r\n";//пофиксить сервенэйм
+        String s = "GET /test.html HTTP/1.1\r\nHost:" + serverName +"\r\n\r\n";//пофиксить сервенэйм
         output.write(s.getBytes());
         output.flush();
         System.out.println("Запрос отправлен");
     }
 
     //получает ответ
-    private static void receiveData() {
+    private void receiveData() {
         try{
             BufferedReader reader = new BufferedReader(new InputStreamReader(input));
             System.out.println("Работаем...\n");
