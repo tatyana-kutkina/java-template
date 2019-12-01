@@ -16,8 +16,9 @@ public class Server2 {
     public static void main(String[] args){
         try{
             ServerSocket server = new ServerSocket(5678);
-            while(true){
+
                 System.out.println("Waiting for connection...");
+
                 connection = server.accept();
                 System.out.println("Connection accepted.");
 
@@ -30,7 +31,7 @@ public class Server2 {
                 String filePath = receiveData(); //получает запрос клиента
 
                 sendData(filePath); // отправляет ответ клиенту
-            }
+
         }catch(IOException e){
             e.printStackTrace();
         }
@@ -64,12 +65,10 @@ public class Server2 {
             }
             catch(IOException e){
                 e.printStackTrace();
-                System.out.println("Файл не существует или ошибка");
             }
         } else{
             output.writeUTF("Искомого файла не существует");
         }
-
 
     }
 
@@ -82,18 +81,18 @@ public class Server2 {
         try{
             String line;
             if((line=reader.readLine())!=null) {
-                System.out.println(line);
-                String[] st = line.split("/");
+                //System.out.println(line);
+                String[] st = line.split(" ");
                 System.out.println(Arrays.toString(st));
                 if(st[1].length()>0){
-                    filePath = st[1];
+                    filePath = st[1].substring(1);
                     System.out.println("Запрос принят. Ищем файл: " + filePath);
                     String str;
-                    /*while((str=reader.readLine()).length()!=0)
-                        System.out.println(str);*/
+                    while((str=reader.readLine()).length()!=0)
+                        System.out.println(str);
                     return filePath;
                 }
-            }else System.out.println("ЧТо то сломалось");
+            }else System.out.println("Что то сломалось");
 
         }catch(IOException e){
             e.printStackTrace();
