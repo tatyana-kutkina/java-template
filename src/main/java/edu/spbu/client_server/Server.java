@@ -12,35 +12,51 @@ public class Server {
     static private Socket connection;
     static private DataOutputStream output;
     static private DataInputStream input;
-
+/*
     public Server(int port) throws IOException {
         ServerSocket server = new ServerSocket(port);
         System.out.println("Waiting for connection...");
+        while (true) {
+            connection = server.accept();
+            System.out.println("Connection accepted.");
 
-        connection = server.accept();
-        System.out.println("Connection accepted.");
+            output = new DataOutputStream(connection.getOutputStream());
+            System.out.println("DataOutputStream  created");
 
-        output = new DataOutputStream(connection.getOutputStream());
-        System.out.println("DataOutputStream  created");
+            input = new DataInputStream(connection.getInputStream());
+            System.out.println("DataInputStream created");
+        }
 
-        input = new DataInputStream(connection.getInputStream());
-        System.out.println("DataInputStream created");
-    }
+    }*/
 
     public static void main(String[] args){
         try{
 
-            Server server = new Server(5678);
-            String filePath = server.receiveData(); //получает запрос клиента
-            server.sendData(filePath); // отправляет ответ клиенту
+            //Server server = new Server(5678);
+            int port = 5678;
+            ServerSocket server = new ServerSocket(port);
+            System.out.println("Waiting for connection...");
+            while (true) {
+                connection = server.accept();
+                System.out.println("Connection accepted.");
 
+                output = new DataOutputStream(connection.getOutputStream());
+                System.out.println("DataOutputStream  created");
+
+                input = new DataInputStream(connection.getInputStream());
+                System.out.println("DataInputStream created");
+
+                String filePath = receiveData(); //получает запрос клиента
+                sendData(filePath); // отправляет ответ клиенту
+                //server.close();
+            }
         }catch(IOException e){
             e.printStackTrace();
         }
     }
 
     //отправляет ответ
-    private void sendData(String filePath) throws IOException {
+    private static void sendData(String filePath) throws IOException {
         File file = new File(filePath);
         if(file.exists()){
             try(FileReader fileRead = new FileReader(file)){
@@ -76,7 +92,7 @@ public class Server {
     }
 
     //получает запрос
-    private String receiveData(){
+    private static String receiveData(){
 
         String filePath;
         BufferedReader reader = new BufferedReader(new InputStreamReader(input));
