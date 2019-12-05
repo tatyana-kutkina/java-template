@@ -7,37 +7,40 @@ import java.net.Socket;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
-public class Server2 {
+public class Server {
 
     static private Socket connection;
     static private DataOutputStream output;
     static private DataInputStream input;
 
+    public Server(int port) throws IOException {
+        ServerSocket server = new ServerSocket(port);
+        System.out.println("Waiting for connection...");
+
+        connection = server.accept();
+        System.out.println("Connection accepted.");
+
+        output = new DataOutputStream(connection.getOutputStream());
+        System.out.println("DataOutputStream  created");
+
+        input = new DataInputStream(connection.getInputStream());
+        System.out.println("DataInputStream created");
+    }
+
     public static void main(String[] args){
         try{
-            ServerSocket server = new ServerSocket(5678);
-            while(true){
-                System.out.println("Waiting for connection...");
-                connection = server.accept();
-                System.out.println("Connection accepted.");
 
-                output = new DataOutputStream(connection.getOutputStream());
-                System.out.println("DataOutputStream  created");
+            Server server = new Server(5678);
+            String filePath = server.receiveData(); //получает запрос клиента
+            server.sendData(filePath); // отправляет ответ клиенту
 
-                input = new DataInputStream(connection.getInputStream());
-                System.out.println("DataInputStream created");
-
-                String filePath = receiveData(); //получает запрос клиента
-
-                sendData(filePath); // отправляет ответ клиенту
-            }
         }catch(IOException e){
             e.printStackTrace();
         }
     }
 
     //отправляет ответ
-    private static void sendData(String filePath) throws IOException {
+    private void sendData(String filePath) throws IOException {
         File file = new File(filePath);
         if(file.exists()){
             try(FileReader fileRead = new FileReader(file)){
@@ -60,40 +63,42 @@ public class Server2 {
                         "Content-Type: text/html\r\n" +
                         "Connection: close\r\n\r\n" +content;
                 output.write(message.getBytes());//отправляем ответ
+                //System.out.println("Ответ отправлен");
                 output.close();
             }
             catch(IOException e){
                 e.printStackTrace();
-                System.out.println("Файл не существует или ошибка");
             }
         } else{
             output.writeUTF("Искомого файла не существует");
         }
 
-
     }
 
     //получает запрос
-    private static String receiveData(){
+    private String receiveData(){
 
         String filePath;
         BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-        System.out.println("Запрос принят");
+        //System.out.println("Запрос принят");
         try{
             String line;
             if((line=reader.readLine())!=null) {
-                System.out.println(line);
-                String[] st = line.split("/");
+                //System.out.println(line);
+                String[] st = line.split(" ");
                 System.out.println(Arrays.toString(st));
                 if(st[1].length()>0){
-                    filePath = st[1];
+                    filePath = st[1].substring(1);
                     System.out.println("Запрос принят. Ищем файл: " + filePath);
-                    String str;
-                    /*while((str=reader.readLine()).length()!=0)
+
+                    //печать запроса клиента
+                    /*String str;
+                    while((str=reader.readLine()).length()!=0)
                         System.out.println(str);*/
+
                     return filePath;
                 }
-            }else System.out.println("ЧТо то сломалось");
+            }else System.out.println("Что то сломалось");
 
         }catch(IOException e){
             e.printStackTrace();
